@@ -15,11 +15,23 @@ void movemotor(uint16_t newPosition) {
   if (steps > 0) { digitalWrite(DIR_PIN, HIGH);} 
   else           { digitalWrite(DIR_PIN, LOW); }
   steps = abs(steps); 
+
+  int acceleration = 100; // Number of steps to accelerate
+  int deceleration = 100; // Number of steps to decelerate
+  int maxSpeedDelay = 1; // Minimum delay between steps (max speed)
+  int minSpeedDelay = 10; // Maximum delay between steps (min speed)
+
   for (int i = 0; i < steps; i++) {
+    int delayTime = maxSpeedDelay;
+    if (i < acceleration) {
+      delayTime = minSpeedDelay - (i * (minSpeedDelay - maxSpeedDelay) / acceleration);
+    } else if (i >= steps - deceleration) {
+      delayTime = minSpeedDelay - ((steps - i - 1) * (minSpeedDelay - maxSpeedDelay) / deceleration);
+    }
     digitalWrite(PULSE_PIN, HIGH);
-    delay(1);
+    delay(delayTime);
     digitalWrite(PULSE_PIN, LOW);
-    delay(1);
+    delay(delayTime);
   }
 }
 
@@ -64,6 +76,5 @@ void setup() {
 
 void loop() {
   readSerial();
-  
 }
 
